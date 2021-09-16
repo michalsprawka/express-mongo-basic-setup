@@ -10,6 +10,13 @@ const app = express();
 
 app.use(express.json());
 
+app.use((res, req, next) => {
+    res.setHeader('Access-Control-Allow-Origin','*');
+    res.setHeader('Access-Control-Allow-Methods','GET, POST, PUT,PATCH,DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+})
+
 app.use('/feed', feedRoutes);
 
 app.listen(port=3003);
