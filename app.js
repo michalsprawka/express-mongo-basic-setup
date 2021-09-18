@@ -1,8 +1,12 @@
+require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser');
+
 
 const feedRoutes = require('./routes/feed');
 
+const mongoose = require('mongoose');
+const mongoURI = `mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.rz656.mongodb.net/messages?retryWrites=true&w=majority`
+//const client = new MongoClient(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true});
 const app = express();
 //below are depracted see: https://medium.com/@mmajdanski/express-body-parser-and-why-may-not-need-it-335803cd048c
 //app.use(bodyParser.urlencoded());
@@ -20,5 +24,9 @@ app.use((req, res, next) => {
 })
 
 app.use('/feed', feedRoutes);
-
-app.listen(port=3003);
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true})
+.then(result => {
+    console.log("CONNECTED !")
+    app.listen(port=3003);
+})
+.catch(error => console.log(error));
