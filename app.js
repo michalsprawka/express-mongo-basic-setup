@@ -5,7 +5,7 @@ const express = require('express');
 const feedRoutes = require('./routes/feed');
 
 const mongoose = require('mongoose');
-const mongoURI = `mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.rz656.mongodb.net/messages?retryWrites=true&w=majority`
+const mongoURI = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.rz656.mongodb.net/messages?retryWrites=true&w=majority`
 //const client = new MongoClient(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true});
 const app = express();
 //below are depracted see: https://medium.com/@mmajdanski/express-body-parser-and-why-may-not-need-it-335803cd048c
