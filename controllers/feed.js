@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator/check');
 const Post = require('../models/post');
+const User = require('../models/user');
 
 exports.getPosts = (req, res, next) => {
 
@@ -14,29 +15,44 @@ exports.getPosts = (req, res, next) => {
 exports.createPost = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({
-            message: 'Validation failed',
-            errors: errors.array()
-        })
+        const error = new Error('Validation failed');
+        error.statusCode = 422;
+        throw error;
+        // return res.status(422).json({
+        //     message: 'Validation failed',
+        //     errors: errors.array()
+        // })
     }
     const title = req.body.title;
     const content = req.body.content;
+    let creator;
 
     const post = new Post({
         title: title,
-        content: content
+        content: content,
+        creator: req.userId
     })
     post.save()
         .then(result => {
-            console.log(result);
+            return User.findById(req.userId)})
+        .then(user => {
+            creator = user
+            user.posts.push(post)
+            return user.save()
+        })
+        .then (result => {
             res.status(201).json({
                 message: "Post create success !!!",
-                post: result
+                post: post,
+                creator: {_id: creator._id, name: creator.name}
             });
-
         })
+            
         .catch(err => {
-            console.log(err);
+           if(!err.statusCode){
+               err.statusCode = 500;
+           }
+           next(err);
         })
 
 
@@ -78,6 +94,11 @@ exports.updatePost = (req, res,next) => {
             error.statusCode = 404;
             throw error;
         }
+        if(post.creator.toString() !== req.userId) {
+            const error = new Error('Not authorised');
+            error.statusCode = 403;
+            throw error;
+        }
         post.title = title;
         post.content = content;
         return post.save();
@@ -103,12 +124,26 @@ exports.deletePost = (req, res, next) => {
                 error.statusCode = 404;
                 throw error;
             }
+            if(post.creator.toString() !== req.userId) {
+                const error = new Error('Not authorised');
+                error.statusCode = 403;
+                throw error;
+            }
             return Post.findByIdAndRemove(postId)
 
 
         }
     )
     .then(result =>  {
+       return  User.findById(req.userId);
+        
+    })
+    .then(user => {
+        user.posts.pull(postId);
+        return user.save()
+        
+    })
+    .then(result => {
         res.status(200).json({message: "Post deleted"})
     })
     .catch(err => print(err))
