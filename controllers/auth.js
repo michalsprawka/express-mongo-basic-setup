@@ -4,6 +4,8 @@ const User = require('../models/user');
 const { load } = require('dotenv');
 const jwt = require('jsonwebtoken');
 
+const io = require('../socket');
+
 
 
 exports.signup = (req, res, next) => {
@@ -65,6 +67,7 @@ exports.login = (req, res, next) => {
         const token = jwt.sign({email: loadedUser.email,
                                 userId: loadedUser._id.toString(),
                                 }, 'somesupersecret', {expiresIn: '1h'})
+        io.getIO().emit('message', {action: 'LOGGED'});
         res.status(200).json({token: token, userId: loadedUser._id.toString()})
     })
     .catch(
