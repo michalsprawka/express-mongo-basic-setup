@@ -5,6 +5,7 @@ const User = require('../models/user');
 exports.getPosts = (req, res, next) => {
 
     Post.find()
+        .populate('creator')
         .then(posts => {
             res.status(200)
                 .json({ message: "Fetched posts succesfully", posts: posts })
