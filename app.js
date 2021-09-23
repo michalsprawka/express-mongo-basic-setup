@@ -42,6 +42,10 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true})
     const io = require('./socket').init(server);
     io.on('connection', socket =>{
        console.log("client connected"); 
+       socket.on('message',(data)=>{
+           print(data);
+       })
     })
 })
 .catch(error => console.log(error));
+
